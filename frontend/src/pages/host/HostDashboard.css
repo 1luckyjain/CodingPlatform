@@ -1,0 +1,75 @@
+/* Host Dashboard */
+.host-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.host-banner {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+}
+
+.host-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, #f59e0b, #6366f1);
+}
+
+.host-icon {
+    font-size: 3rem;
+    flex-shrink: 0;
+}
+
+.host-quick-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* Contests summary */
+.contests-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.contest-summary-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .host-banner {
+        flex-direction: column;
+    }
+
+    .host-quick-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .host-quick-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

@@ -1,0 +1,170 @@
+/* Contest Detail */
+.contest-detail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.contest-detail-header {
+    position: relative;
+}
+
+.cdh-top {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.contest-detail-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+}
+
+.contest-detail-desc {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    max-width: 600px;
+}
+
+/* Timer */
+.contest-timer-box {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    flex-shrink: 0;
+    min-width: 220px;
+}
+
+.timer-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.timer-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--primary-light);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.875rem;
+}
+
+.timer-dates {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.cdh-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.cdh-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.cdh-stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.cdh-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.joined-badge {
+    background: var(--success-bg);
+    color: var(--success);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-lg);
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.contest-tabs {
+    display: flex;
+    gap: 0.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    padding: 0.5rem;
+    width: fit-content;
+}
+
+/* Rank badges */
+.rank-badge {
+    font-size: 1.25rem;
+}
+
+.mini-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+/* Rules */
+.rules-content {
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.default-rules ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.default-rules li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.default-rules li::before {
+    content: '→';
+    color: var(--primary-light);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .cdh-top {
+        flex-direction: column;
+    }
+
+    .contest-timer-box {
+        width: 100%;
+    }
+}

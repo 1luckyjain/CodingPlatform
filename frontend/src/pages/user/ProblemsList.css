@@ -1,0 +1,147 @@
+/* Problems List */
+.problems-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+/* Filters */
+.problems-filters {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding: 1.25rem 1.5rem;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 0.5rem 1rem;
+    flex: 1;
+    min-width: 200px;
+    transition: var(--transition);
+}
+
+.search-box:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.search-icon {
+    font-size: 1rem;
+    color: var(--text-muted);
+}
+
+.search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.difficulty-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.375rem 0.875rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-light);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.filter-btn:hover {
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+.filter-btn.active {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--primary);
+}
+
+.filter-btn.easy.active {
+    border-color: var(--easy);
+    color: var(--easy);
+    background: var(--success-bg);
+}
+
+.filter-btn.medium.active {
+    border-color: var(--medium);
+    color: var(--medium);
+    background: var(--warning-bg);
+}
+
+.filter-btn.hard.active {
+    border-color: var(--hard);
+    color: var(--hard);
+    background: var(--error-bg);
+}
+
+/* Problems Table */
+.problems-table th:first-child {
+    width: 60px;
+}
+
+.problems-table th:nth-child(4) {
+    width: 180px;
+}
+
+.problems-table th:nth-child(5),
+.problems-table th:nth-child(6) {
+    width: 120px;
+}
+
+.problem-title-link {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.9375rem;
+    transition: var(--transition);
+}
+
+.problem-title-link:hover {
+    color: var(--primary-light);
+}
+
+.problem-tags {
+    display: flex;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-info {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
