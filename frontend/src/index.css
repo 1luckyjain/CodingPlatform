@@ -74,6 +74,43 @@
 }
 
 /* =============================================
+   LIGHT THEME VARIABLES
+   ============================================= */
+[data-theme="light"] {
+  --bg-primary: #f0f2f5;
+  --bg-secondary: #e8eaf0;
+  --bg-tertiary: #dde0ea;
+  --bg-card: #ffffff;
+  --bg-hover: #eceef5;
+
+  --border: rgba(99, 102, 241, 0.25);
+  --border-light: rgba(0, 0, 0, 0.08);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.15);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] .navbar {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+[data-theme="light"] .card-glass {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+
+/* =============================================
    RESET & BASE STYLES
    ============================================= */
 *,

@@ -25,11 +25,27 @@ const judge0 = axios.create({
  */
 const LANGUAGE_IDS = {
     javascript: 93,  // Node.js 18.15.0
-    python: 92,  // Python 3.11.2
-    cpp: 54,  // C++ (GCC 9.2.0)
-    c: 50,  // C (GCC 9.2.0)
-    java: 62,  // Java (OpenJDK 13.0.1)
+    python: 92,      // Python 3.11.2
+    cpp: 54,         // C++ (GCC 9.2.0)
+    c: 50,           // C (GCC 9.2.0)
+    java: 62,        // Java (OpenJDK 13.0.1)
 };
+
+/**
+ * Normalize output for comparison:
+ * - Trim leading/trailing whitespace
+ * - Normalize \r\n and \r to \n
+ * - Trim each line
+ * - Remove trailing blank lines
+ */
+const normalizeOutput = (str = '') =>
+    str
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .split('\n')
+        .map((line) => line.trimEnd())   // remove trailing spaces per line
+        .join('\n')
+        .trim();
 
 /**
  * Map Judge0 status ID → our verdict string
@@ -55,12 +71,6 @@ const mapStatus = (statusId, description) => {
 
 /**
  * Submit code to Judge0 and poll for result.
- *
- * @param {string} code       - Source code
- * @param {string} language   - One of: javascript, python, cpp, c, java
- * @param {string} input      - stdin for the test case
- * @param {number} timeLimit  - Time limit in seconds (Judge0 uses seconds)
- * @returns {Promise<{success, output, status, error, executionTime}>}
  */
 const runSingleTestCase = async (code, language, input, timeLimitMs = 5000) => {
     const languageId = LANGUAGE_IDS[language?.toLowerCase()];
@@ -75,11 +85,10 @@ const runSingleTestCase = async (code, language, input, timeLimitMs = 5000) => {
         };
     }
 
-    const timeLimitSec = Math.min(timeLimitMs / 1000, 10); // Judge0 max is 15s
+    const timeLimitSec = Math.min(timeLimitMs / 1000, 10);
     const startTime = Date.now();
 
     try {
-        // Submit with wait=true for synchronous result (simpler than polling)
         const { data } = await judge0.post(
             '/submissions?base64_encoded=false&wait=true',
             {
@@ -129,7 +138,7 @@ const runSingleTestCase = async (code, language, input, timeLimitMs = 5000) => {
                 status: 'Runtime Error',
                 error: (data.stderr || data.message || statusDesc).trim(),
                 executionTime,
-                output: (data.stdout || '').trim(),
+                output: normalizeOutput(data.stdout || ''),
             };
         }
 
@@ -137,7 +146,7 @@ const runSingleTestCase = async (code, language, input, timeLimitMs = 5000) => {
         return {
             success: statusId === 3,
             status: statusId === 3 ? 'Accepted' : mapStatus(statusId, statusDesc),
-            output: (data.stdout || '').trim(),
+            output: normalizeOutput(data.stdout || ''),
             error: (data.stderr || '').trim(),
             executionTime,
         };
@@ -185,14 +194,21 @@ const executeCode = async ({ code, language, testCases, timeLimit = 5000 }) => {
 
         lastOutput = result.output;
 
-        const expected = (testCases[i].output || '').trim();
-        const actual = result.output.trim();
+        const expected = normalizeOutput(testCases[i].output || '');
+        const actual = normalizeOutput(result.output);
+
+        // If expected is empty (custom input run mode — no expected output), skip comparison
+        if (expected === '') {
+            testCasesPassed++;
+            continue;
+        }
 
         if (actual === expected) {
             testCasesPassed++;
         } else {
             finalStatus = 'Wrong Answer';
-            errorMessage = `Test Case ${i + 1}:\nExpected: ${expected}\nGot:      ${actual}`;
+            errorMessage = `Test Case ${i + 1}:\nExpected:\n${expected}\n\nGot:\n${actual}`;
+            lastOutput = actual;
             break;
         }
     }
