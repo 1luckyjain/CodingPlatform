@@ -254,6 +254,29 @@
     color: var(--error);
 }
 
+
+/* Theme Toggle Button */
+.theme-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-light);
+    background: var(--bg-card);
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+    border-color: var(--primary);
+    background: var(--bg-hover);
+    transform: rotate(20deg) scale(1.1);
+}
+
 @media (max-width: 768px) {
     .navbar-links {
         display: none;

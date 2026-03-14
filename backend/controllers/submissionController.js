@@ -34,7 +34,7 @@ const submitCode = async (req, res, next) => {
         await Problem.findByIdAndUpdate(problemId, { $inc: { totalSubmissions: 1 } });
         await User.findByIdAndUpdate(req.user.id, { $inc: { totalSubmissions: 1 } });
 
-        // Execute code against test cases
+        // Execute code against test cases3
         const testCases = problem.hiddenTestCases.length > 0
             ? problem.hiddenTestCases
             : problem.sampleTestCases;
@@ -99,10 +99,12 @@ const runCode = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'Problem not found.' });
         }
 
-        // Use sample test cases or custom input
-        const testCases = customInput
+        const isCustom = !!customInput;
+
+        // output: '' on custom input => comparison skipped in executeCode (no expected answer)
+        const testCases = isCustom
             ? [{ input: customInput, output: '' }]
-            : problem.sampleTestCases.slice(0, 3); // Only run first 3 sample cases
+            : problem.sampleTestCases.slice(0, 3);
 
         const result = await codeExecutionService.executeCode({
             code,
@@ -111,6 +113,12 @@ const runCode = async (req, res, next) => {
             timeLimit: problem.timeLimit,
             memoryLimit: problem.memoryLimit,
         });
+
+        // Custom input: don't show WA/AC verdict — just show raw output
+        if (isCustom && (result.status === 'Accepted' || result.status === 'Wrong Answer')) {
+            result.status = 'Completed';
+            result.errorMessage = '';
+        }
 
         res.status(200).json({
             success: true,

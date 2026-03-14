@@ -3,73 +3,110 @@ import { useParams, Link } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { problemsAPI, submissionsAPI } from '../../services/api';
 import toast from 'react-hot-toast';
+import { useTheme } from '../../context/ThemeContext';
 import './ProblemDetail.css';
 
 const LANGUAGE_OPTIONS = [
     {
-        value: 'javascript', label: 'JavaScript', monacoLang: 'javascript', defaultCode: `// Write your solution here
-function solution() {
-  // Your code here
-}
-
-// Read input
-const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');
-// Process and output
-console.log(solution());` },
+        value: 'javascript',
+        label: 'JavaScript',
+        monacoLang: 'javascript',
+        defaultCode: `// Read all input from stdin
+process.stdin.resume();
+process.stdin.setEncoding('utf8');
+let inputData = '';
+process.stdin.on('data', (d) => { inputData += d; });
+process.stdin.on('end', () => {
+    const lines = inputData.trim().split('\\n');
+    // TODO: parse lines and solve the problem
+    // Example: const n = parseInt(lines[0]);
+    console.log('your output here');
+});`,
+    },
     {
-        value: 'python', label: 'Python', monacoLang: 'python', defaultCode: `import sys
-input = sys.stdin.read().strip().split('\\n')
+        value: 'python',
+        label: 'Python',
+        monacoLang: 'python',
+        defaultCode: `import sys
 
-def solution():
-    # Your code here
-    pass
+def solve():
+    data = sys.stdin.read().split()
+    # TODO: parse data and solve the problem
+    # Example: n = int(data[0])
+    print("your output here")
 
-print(solution())` },
+solve()`,
+    },
     {
-        value: 'cpp', label: 'C++', monacoLang: 'cpp', defaultCode: `#include <bits/stdc++.h>
+        value: 'cpp',
+        label: 'C++',
+        monacoLang: 'cpp',
+        defaultCode: `#include <bits/stdc++.h>
 using namespace std;
 
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     
-    // Your code here
+    // TODO: read input and solve
+    // Example: int n; cin >> n;
     
     return 0;
-}` },
+}`,
+    },
     {
-        value: 'java', label: 'Java', monacoLang: 'java', defaultCode: `import java.util.*;
+        value: 'java',
+        label: 'Java',
+        monacoLang: 'java',
+        defaultCode: `import java.util.*;
 import java.io.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        // Your code here
+        // TODO: read input and solve
+        // Example: int n = Integer.parseInt(br.readLine().trim());
     }
-}` },
+}`,
+    },
     {
-        value: 'c', label: 'C', monacoLang: 'c', defaultCode: `#include <stdio.h>
+        value: 'c',
+        label: 'C',
+        monacoLang: 'c',
+        defaultCode: `#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 int main() {
-    // Your code here
+    // TODO: read input and solve
+    // Example: int n; scanf("%d", &n);
     return 0;
-}` },
+}`,
+    },
 ];
 
 const ProblemDetail = () => {
     const { id } = useParams();
+    const { theme } = useTheme();
     const [problem, setProblem] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [selectedLang, setSelectedLang] = useState(LANGUAGE_OPTIONS[0]);
-    const [code, setCode] = useState(LANGUAGE_OPTIONS[0].defaultCode);
-    const [activeTab, setActiveTab] = useState('description'); // description | testcases | submissions
-    const [result, setResult] = useState(null);
+    const [selectedLang, setSelectedLang] = useState(() => {
+        const saved = localStorage.getItem(`cc-lang-${window.location.pathname}`);
+        return LANGUAGE_OPTIONS.find(l => l.value === saved) || LANGUAGE_OPTIONS[0];
+    });
+    const [code, setCode] = useState(() => {
+        const lang = localStorage.getItem(`cc-lang-${window.location.pathname}`) || LANGUAGE_OPTIONS[0].value;
+        return localStorage.getItem(`cc-code-${window.location.pathname}-${lang}`) || LANGUAGE_OPTIONS[0].defaultCode;
+    });
+    const [activeTab, setActiveTab] = useState('description');
+    // Separate state for run vs submit — prevents stale result bleed
+    const [runResult, setRunResult] = useState(null);
+    const [submitResult, setSubmitResult] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [running, setRunning] = useState(false);
     const [customInput, setCustomInput] = useState('');
     const [useCustomInput, setUseCustomInput] = useState(false);
+    const [lastRunInput, setLastRunInput] = useState('');
 
     useEffect(() => {
         const fetchProblem = async () => {
@@ -88,8 +125,11 @@ const ProblemDetail = () => {
 
     const handleLangChange = (lang) => {
         setSelectedLang(lang);
-        setCode(lang.defaultCode);
-        setResult(null);
+        const saved = localStorage.getItem(`cc-code-${window.location.pathname}-${lang.value}`);
+        setCode(saved || lang.defaultCode);
+        localStorage.setItem(`cc-lang-${window.location.pathname}`, lang.value);
+        setRunResult(null);
+        setSubmitResult(null);
     };
 
     const handleRun = async () => {
@@ -98,7 +138,9 @@ const ProblemDetail = () => {
             return;
         }
         setRunning(true);
-        setResult(null);
+        setRunResult(null);
+        const inputUsed = useCustomInput ? customInput : (problem?.sampleTestCases?.[0]?.input || '');
+        setLastRunInput(inputUsed);
         try {
             const { data } = await submissionsAPI.run({
                 problemId: id,
@@ -106,7 +148,7 @@ const ProblemDetail = () => {
                 language: selectedLang.value,
                 customInput: useCustomInput ? customInput : null,
             });
-            setResult({ ...data.result, type: 'run' });
+            setRunResult(data.result);
             setActiveTab('testcases');
         } catch (err) {
             toast.error(err.response?.data?.message || 'Run failed');
@@ -121,7 +163,7 @@ const ProblemDetail = () => {
             return;
         }
         setSubmitting(true);
-        setResult(null);
+        setSubmitResult(null);
         try {
             const { data } = await submissionsAPI.submit({
                 problemId: id,
@@ -129,8 +171,8 @@ const ProblemDetail = () => {
                 language: selectedLang.value,
             });
             const sub = data.submission;
-            setResult({ ...sub, type: 'submit' });
-            setActiveTab('testcases');
+            setSubmitResult(sub);
+            setActiveTab('submissions');
 
             if (sub.status === 'Accepted') {
                 toast.success('🎉 Accepted! Great work!');
@@ -167,6 +209,8 @@ const ProblemDetail = () => {
             </div>
         );
     }
+
+    const monacoTheme = theme === 'dark' ? 'vs-dark' : 'vs-light';
 
     return (
         <div className="problem-detail-page fade-in">
@@ -297,46 +341,55 @@ const ProblemDetail = () => {
                                 </div>
                             )}
 
-                            {result && (
-                                <div className={`result-box ${result.status === 'Accepted' ? 'success' : 'error'}`}>
+                            {runResult && (
+                                <div className={`result-box ${runResult.status === 'Accepted' || runResult.status === 'Completed' ? 'success' : 'error'}`}>
                                     <div className="result-header">
-                                        <span className={`result-status verdict ${result.status === 'Accepted' ? 'verdict-accepted' :
-                                                result.status === 'Time Limit Exceeded' ? 'verdict-tle' :
-                                                    'verdict-wrong'
-                                            }`}>
-                                            {result.status === 'Accepted' ? '✅' : '❌'} {result.status}
+                                        <span className={`result-status verdict ${
+                                            runResult.status === 'Accepted' ? 'verdict-accepted' :
+                                            runResult.status === 'Completed' ? 'verdict-completed' :
+                                            runResult.status === 'Time Limit Exceeded' ? 'verdict-tle' :
+                                            'verdict-wrong'
+                                        }`}>
+                                            {runResult.status === 'Accepted' ? '✅' : runResult.status === 'Completed' ? '▶' : '❌'} {runResult.status}
                                         </span>
                                         <div className="result-meta">
-                                            {result.executionTime !== undefined && (
-                                                <span>⏱️ {result.executionTime}ms</span>
+                                            {runResult.executionTime !== undefined && (
+                                                <span>⏱️ {runResult.executionTime}ms</span>
                                             )}
-                                            {result.testCasesPassed !== undefined && (
-                                                <span>🧪 {result.testCasesPassed}/{result.testCasesTotal} passed</span>
+                                            {runResult.testCasesPassed !== undefined && (
+                                                <span>🧪 {runResult.testCasesPassed}/{runResult.testCasesTotal} passed</span>
                                             )}
                                         </div>
                                     </div>
 
-                                    {result.output && (
+                                    {lastRunInput && (
                                         <div className="result-output">
-                                            <div className="io-label">Output:</div>
-                                            <pre className="io-code code-font">{result.output}</pre>
+                                            <div className="io-label">Input used:</div>
+                                            <pre className="io-code code-font">{lastRunInput}</pre>
                                         </div>
                                     )}
 
-                                    {result.errorMessage && (
+                                    {runResult.output && (
+                                        <div className="result-output">
+                                            <div className="io-label">Output:</div>
+                                            <pre className="io-code code-font">{runResult.output}</pre>
+                                        </div>
+                                    )}
+
+                                    {runResult.errorMessage && (
                                         <div className="result-error">
-                                            <div className="io-label text-error">Error:</div>
-                                            <pre className="io-code code-font text-error">{result.errorMessage}</pre>
+                                            <div className="io-label text-error">Error / Details:</div>
+                                            <pre className="io-code code-font text-error">{runResult.errorMessage}</pre>
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            {!result && (
+                            {!runResult && (
                                 <div className="empty-state" style={{ padding: '3rem 1rem' }}>
                                     <div className="empty-icon">🧪</div>
                                     <h3>No results yet</h3>
-                                    <p>Run or submit your code to see the results here.</p>
+                                    <p>Click <strong>▶ Run Code</strong> to test against sample cases.</p>
                                 </div>
                             )}
                         </div>
@@ -348,20 +401,30 @@ const ProblemDetail = () => {
                             <Link to="/submissions" className="btn btn-secondary btn-sm mb-md">
                                 View all my submissions →
                             </Link>
-                            {result && result.type === 'submit' && (
-                                <div className={`result-box ${result.status === 'Accepted' ? 'success' : 'error'}`}>
+                            {submitResult && (
+                                <div className={`result-box ${submitResult.status === 'Accepted' ? 'success' : 'error'}`}>
                                     <div className="result-header">
-                                        <span className={`verdict ${result.status === 'Accepted' ? 'verdict-accepted' : 'verdict-wrong'}`}>
-                                            {result.status}
+                                        <span className={`verdict ${submitResult.status === 'Accepted' ? 'verdict-accepted' :
+                                            submitResult.status === 'Time Limit Exceeded' ? 'verdict-tle' : 'verdict-wrong'}`}>
+                                            {submitResult.status === 'Accepted' ? '✅' : '❌'} {submitResult.status}
                                         </span>
                                         <div className="result-meta">
-                                            <span>⏱️ {result.executionTime}ms</span>
-                                            <span>🧪 {result.testCasesPassed}/{result.testCasesTotal}</span>
+                                            <span>⏱️ {submitResult.executionTime}ms</span>
+                                            <span>🧪 {submitResult.testCasesPassed}/{submitResult.testCasesTotal}</span>
                                         </div>
                                     </div>
-                                    {result.errorMessage && (
-                                        <pre className="io-code code-font text-error mt-md">{result.errorMessage}</pre>
+                                    {submitResult.errorMessage && (
+                                        <pre className="io-code code-font text-error mt-md" style={{ padding: '1rem 1.25rem' }}>
+                                            {submitResult.errorMessage}
+                                        </pre>
                                     )}
+                                </div>
+                            )}
+                            {!submitResult && (
+                                <div className="empty-state" style={{ padding: '3rem 1rem' }}>
+                                    <div className="empty-icon">🚀</div>
+                                    <h3>No submission yet</h3>
+                                    <p>Click <strong>🚀 Submit</strong> to run against all hidden test cases.</p>
                                 </div>
                             )}
                         </div>
@@ -371,7 +434,7 @@ const ProblemDetail = () => {
 
             {/* Editor Panel */}
             <div className="editor-panel">
-                {/* Language Selector */}
+                {/* Language Selector + Theme Toggle */}
                 <div className="editor-toolbar">
                     <div className="lang-selector">
                         {LANGUAGE_OPTIONS.map((lang) => (
@@ -387,11 +450,15 @@ const ProblemDetail = () => {
                     <div className="editor-actions">
                         <button
                             className="btn btn-secondary btn-sm"
-                            onClick={() => setCode(selectedLang.defaultCode)}
+                            onClick={() => {
+                                setCode(selectedLang.defaultCode);
+                                localStorage.removeItem(`cc-code-${window.location.pathname}-${selectedLang.value}`);
+                            }}
                             title="Reset to default"
                         >
                             ↺ Reset
                         </button>
+
                     </div>
                 </div>
 
@@ -401,8 +468,12 @@ const ProblemDetail = () => {
                         height="100%"
                         language={selectedLang.monacoLang}
                         value={code}
-                        onChange={(val) => setCode(val || '')}
-                        theme="vs-dark"
+                        onChange={(val) => {
+                            const v = val || '';
+                            setCode(v);
+                            localStorage.setItem(`cc-code-${window.location.pathname}-${selectedLang.value}`, v);
+                        }}
+                        theme={monacoTheme}
                         options={{
                             fontSize: 14,
                             fontFamily: "'JetBrains Mono', 'Fira Code', monospace",

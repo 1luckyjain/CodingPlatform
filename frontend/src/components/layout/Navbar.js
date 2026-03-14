@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import './Navbar.css';
 
 const Navbar = () => {
     const { user, isAuthenticated, isHost, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
@@ -62,6 +64,16 @@ const Navbar = () => {
 
                 {/* Right Side */}
                 <div className="navbar-actions">
+                    {/* Theme Toggle */}
+                    <button
+                        className="theme-toggle"
+                        onClick={toggleTheme}
+                        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                        aria-label="Toggle theme"
+                    >
+                        {theme === 'dark' ? '☀️' : '🌙'}
+                    </button>
+
                     {isAuthenticated ? (
                         <div className="navbar-user">
                             <div className="user-info" onClick={() => setMenuOpen(!menuOpen)}>

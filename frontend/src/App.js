@@ -1,9 +1,9 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
 /* context */
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 /* guards */
 import ProtectedRoute, { GuestRoute } from './components/common/ProtectedRoute';
@@ -57,6 +57,14 @@ const LoadingScreen = () => (
   </div>
 );
 
+/* ── Root redirect based on auth state ── */
+const RootRedirect = () => {
+  const { isAuthenticated, isHost, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (!isAuthenticated) return <PageLayout><Landing /></PageLayout>;
+  return <Navigate to={isHost ? '/host/dashboard' : '/dashboard'} replace />;
+};
+
 /* ── Not Found ── */
 const NotFound = () => (
   <PageLayout>
@@ -78,14 +86,7 @@ function App() {
           <Routes>
 
             {/* ── Public routes ── */}
-            <Route
-              path="/"
-              element={
-                <PageLayout>
-                  <Landing />
-                </PageLayout>
-              }
-            />
+            <Route path="/" element={<RootRedirect />} />
 
             <Route
               path="/login"
