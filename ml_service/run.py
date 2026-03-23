@@ -1,0 +1,18 @@
+import sys, os
+
+# Pehle path set karo
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, BASE_DIR)
+
+# Manually schemas, services, utils add karo
+sys.path.insert(0, os.path.join(BASE_DIR, "schemas"))
+sys.path.insert(0, os.path.join(BASE_DIR, "services"))
+sys.path.insert(0, os.path.join(BASE_DIR, "utils"))
+sys.path.insert(0, os.path.join(BASE_DIR, "data"))
+
+# Ab import karo
+from main import app
+import uvicorn
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)

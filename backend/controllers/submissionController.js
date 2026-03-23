@@ -34,7 +34,7 @@ const submitCode = async (req, res, next) => {
         await Problem.findByIdAndUpdate(problemId, { $inc: { totalSubmissions: 1 } });
         await User.findByIdAndUpdate(req.user.id, { $inc: { totalSubmissions: 1 } });
 
-        // Execute code against test cases3
+        // Execute code against test cases
         const testCases = problem.hiddenTestCases.length > 0
             ? problem.hiddenTestCases
             : problem.sampleTestCases;
@@ -43,8 +43,8 @@ const submitCode = async (req, res, next) => {
             code,
             language,
             testCases,
-            timeLimit: problem.timeLimit,
-            memoryLimit: problem.memoryLimit,
+            timeLimit: problem.timeLimit,     // milliseconds (e.g. 2000)
+            memoryLimit: problem.memoryLimit, // MB (e.g. 256)
         });
 
         // Update submission with result
@@ -101,7 +101,7 @@ const runCode = async (req, res, next) => {
 
         const isCustom = !!customInput;
 
-        // output: '' on custom input => comparison skipped in executeCode (no expected answer)
+        // Custom input: no expected output → comparison skipped
         const testCases = isCustom
             ? [{ input: customInput, output: '' }]
             : problem.sampleTestCases.slice(0, 3);
@@ -205,7 +205,7 @@ const updateContestLeaderboard = async (contestId, userId, problemId) => {
 
         if (existingEntry) {
             existingEntry.problemsSolved += 1;
-            existingEntry.score += 100; // Simple scoring
+            existingEntry.score += 100;
         } else {
             contest.leaderboard.push({
                 userId,

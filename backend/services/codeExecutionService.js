@@ -25,10 +25,10 @@ const judge0 = axios.create({
  */
 const LANGUAGE_IDS = {
     javascript: 93,  // Node.js 18.15.0
-    python: 92,  // Python 3.11.2
-    cpp: 54,  // C++ (GCC 9.2.0)
-    c: 50,  // C (GCC 9.2.0)
-    java: 62,  // Java (OpenJDK 13.0.1)
+    python: 92,      // Python 3.11.2
+    cpp: 54,         // C++ (GCC 9.2.0)
+    c: 50,           // C (GCC 9.2.0)
+    java: 62,        // Java (OpenJDK 13.0.1)
 };
 
 /**
@@ -56,10 +56,10 @@ const mapStatus = (statusId, description) => {
 /**
  * Submit code to Judge0 and poll for result.
  *
- * @param {string} code       - Source code
- * @param {string} language   - One of: javascript, python, cpp, c, java
- * @param {string} input      - stdin for the test case
- * @param {number} timeLimit  - Time limit in seconds (Judge0 uses seconds)
+ * @param {string} code         - Source code
+ * @param {string} language     - One of: javascript, python, cpp, c, java
+ * @param {string} input        - stdin for the test case
+ * @param {number} timeLimitMs  - Time limit in milliseconds
  * @returns {Promise<{success, output, status, error, executionTime}>}
  */
 const runSingleTestCase = async (code, language, input, timeLimitMs = 5000) => {
@@ -146,7 +146,13 @@ const runSingleTestCase = async (code, language, input, timeLimitMs = 5000) => {
         const executionTime = Date.now() - startTime;
 
         if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
-            return { success: false, status: 'Time Limit Exceeded', error: 'Execution timed out.', executionTime, output: '' };
+            return {
+                success: false,
+                status: 'Time Limit Exceeded',
+                error: 'Execution timed out.',
+                executionTime,
+                output: '',
+            };
         }
 
         const httpStatus = err.response?.status;
@@ -163,7 +169,10 @@ const runSingleTestCase = async (code, language, input, timeLimitMs = 5000) => {
 };
 
 /**
- * Execute code against ALL test cases and return aggregated verdict.
+ * Execute code against ALL test cases — runs in parallel for speed.
+ *
+ * FIX: Was sequential (for loop) → caused TLE on 15 test cases.
+ *      Now uses Promise.all → all test cases run simultaneously.
  */
 const executeCode = async ({ code, language, testCases, timeLimit = 5000 }) => {
     let testCasesPassed = 0;
@@ -172,8 +181,13 @@ const executeCode = async ({ code, language, testCases, timeLimit = 5000 }) => {
     let errorMessage = '';
     let lastOutput = '';
 
-    for (let i = 0; i < testCases.length; i++) {
-        const result = await runSingleTestCase(code, language, testCases[i].input, timeLimit);
+    // ✅ Run all test cases in parallel instead of one by one
+    const results = await Promise.all(
+        testCases.map((tc) => runSingleTestCase(code, language, tc.input, timeLimit))
+    );
+
+    for (let i = 0; i < results.length; i++) {
+        const result = results[i];
         totalTime += result.executionTime;
 
         if (!result.success) {

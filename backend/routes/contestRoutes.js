@@ -8,6 +8,7 @@ const {
     updateContest,
     deleteContest,
     getMyContests,
+    runPlagiarismCheck,
 } = require('../controllers/contestController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -26,5 +27,6 @@ router.get('/host/my-contests', protect, authorize('host'), getMyContests);
 router.post('/', protect, authorize('host'), createContest);
 router.put('/:id', protect, authorize('host'), updateContest);
 router.delete('/:id', protect, authorize('host'), deleteContest);
+router.post('/:id/run-plagiarism-check', protect, authorize('host'), runPlagiarismCheck);
 
 module.exports = router;

@@ -37,7 +37,7 @@ const getProblems = async (req, res, next) => {
     try {
         const { search, difficulty, tag, page = 1, limit = 20 } = req.query;
 
-        const query = { isPublished: true, contestId: null };
+        const query = { isPublished: true };
 
         // Search by title
         if (search) {
