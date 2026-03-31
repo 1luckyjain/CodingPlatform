@@ -23,13 +23,20 @@ This makes it not just a practice platform, but a fair and scalable coding envir
 ## 📸 Screenshots
 
 ### 🏠 Dashboard
-![Dashboard](your-image-link)
+![Dashboard](https://raw.githubusercontent.com/1luckyjain/CodingPlatform/main/frontend/public/screenshots/dashboard.png)
 
 ### 💻 Code Editor
-![Editor](your-image-link)
+![Editor](https://raw.githubusercontent.com/1luckyjain/CodingPlatform/main/frontend/public/screenshots/editor.png)
 
-### 📊 Leaderboard
-![Leaderboard](your-image-link)
+### 🏆 Contest
+![Contest](https://raw.githubusercontent.com/1luckyjain/CodingPlatform/main/frontend/public/screenshots/contest.png)
+
+### 🔐 Login
+![Login](https://raw.githubusercontent.com/1luckyjain/CodingPlatform/main/frontend/public/screenshots/login.png)
+
+## 🎥 Demo
+
+👉 https://www.youtube.com/watch?v=kYLkV5s8HE0
 
 ## 🧠 AI Features
 
