@@ -32,6 +32,7 @@ const allowedOrigins = [
     'http://localhost:3001',
     'http://localhost:3002',
     'http://localhost:3003',
+    'https://coding-platform-theta-inky.vercel.app',
     process.env.FRONTEND_URL,
 ].filter(Boolean);
 
@@ -55,6 +56,9 @@ app.use(
     })
 );
 
+// Trust proxy (required for Render, Heroku, etc.) so rate-limiting sees the real client IP
+app.set('trust proxy', 1);
+
 // Global rate limiting (100 requests per 15 minutes)
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -76,7 +80,7 @@ const submissionLimiter = rateLimit({
     message: { success: false, message: 'Too many submissions, please wait a moment.' },
 });
 
-app.use('/api/', globalLimiter);
+app.use('/api', globalLimiter);
 
 // =============================================
 //  GENERAL MIDDLEWARE

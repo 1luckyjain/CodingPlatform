@@ -22,11 +22,13 @@ const problemValidation = [
 
 // Public routes
 router.get('/', getProblems);
-router.get('/:id', getProblem);
 
-// Protected routes
+// Protected routes (must be before /:id to prevent 'host' matching as an ID param)
 router.get('/host/my-problems', protect, authorize('host'), getMyProblems);
 router.post('/', protect, authorize('host'), problemValidation, createProblem);
+
+// Parameterized routes
+router.get('/:id', getProblem);
 router.put('/:id', protect, authorize('host'), updateProblem);
 router.delete('/:id', protect, authorize('host'), deleteProblem);
 
