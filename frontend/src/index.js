@@ -4,7 +4,6 @@ import './index.css';
 import App from './App';
 // theme toggle
 import { ThemeProvider } from './context/ThemeContext';
-import { AuthProvider } from './context/AuthContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
